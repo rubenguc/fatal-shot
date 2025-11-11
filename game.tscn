@@ -1,0 +1,85 @@
+[gd_scene load_steps=8 format=3 uid="uid://cph1n44kxx8gh"]
+
+[ext_resource type="PackedScene" uid="uid://dm348461kyxo1" path="res://levels/level.tscn" id="1_7jktm"]
+[ext_resource type="Script" uid="uid://d1nq7ivmmjndb" path="res://addons/virtual_joystick/virtual_joystick.gd" id="4_fc0e3"]
+[ext_resource type="Texture2D" uid="uid://bopr1aixh4md0" path="res://icon.svg" id="5_7jktm"]
+[ext_resource type="PackedScene" uid="uid://6s0bujra3udj" path="res://player/player.tscn" id="5_ryrav"]
+[ext_resource type="Script" uid="uid://ccagqcqvvurdp" path="res://player/frontal_camera_raycast.gd" id="6_eow3j"]
+[ext_resource type="Script" uid="uid://cbc6r3x84ejtj" path="res://addons/radial_progress/RadialProgress.gd" id="6_ryrav"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_j5wjh"]
+radius = 0.2
+
+[node name="world" type="Node3D"]
+
+[node name="level" parent="." instance=ExtResource("1_7jktm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5210352, -1.4870768, 1.1696086)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -0.08993728, 0.9959474, 0, -0.9959474, -0.08993728, 0, 6.5525193, 0)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="VirtualJoystick" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 41.0
+offset_top = 377.0
+offset_right = 250.0
+offset_bottom = 586.0
+scale = Vector2(1.087, 1.087)
+script = ExtResource("4_fc0e3")
+joystick_opacity = 0.445
+joystick_border = 4.5
+scale_factor = 1.087
+stick_opacity = 0.405
+metadata/_custom_type_script = "uid://d1nq7ivmmjndb"
+
+[node name="CameraToggle" type="TouchScreenButton" parent="CanvasLayer"]
+unique_name_in_owner = true
+position = Vector2(989, 302.99997)
+scale = Vector2(0.74218655, 0.72656274)
+texture_normal = ExtResource("5_7jktm")
+visibility_mode = 1
+
+[node name="CameraFocus" type="Control" parent="CanvasLayer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_left = 597.0
+offset_top = 295.0
+offset_right = 637.0
+offset_bottom = 335.0
+script = ExtResource("6_ryrav")
+radius = 200.0
+bar_color = Color(0.82060444, 0.118108906, 0.26609978, 1)
+ring = true
+metadata/_custom_type_script = "uid://cbc6r3x84ejtj"
+
+[node name="Player" parent="." node_paths=PackedStringArray("joystick") instance=ExtResource("5_ryrav")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29, 0, -1)
+joystick = NodePath("../CanvasLayer/VirtualJoystick")
+
+[node name="Cameras" type="Node3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.011407852, 1.4691923, 0.04530406)
+
+[node name="3d" type="SpringArm3D" parent="Player/Cameras"]
+shape = SubResource("SphereShape3D_j5wjh")
+spring_length = -2.0
+
+[node name="PlayerCamera" type="Camera3D" parent="Player/Cameras/3d"]
+transform = Transform3D(-1, 0, 8.742278e-08, 8.770864e-09, 0.9949545, 0.100326985, -8.6981686e-08, 0.100326985, -0.9949545, 0, 0, -2)
+
+[node name="FrontalCamera" type="Camera3D" parent="Player/Cameras"]
+transform = Transform3D(-1, 0, 8.940697e-08, 0, 1, 0, -8.940697e-08, 0, -1, 0, 0.0096383095, 0.16059566)
+
+[node name="Raycast" type="RayCast3D" parent="Player/Cameras/FrontalCamera"]
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0)
+enabled = false
+target_position = Vector3(0, 0, -10)
+debug_shape_custom_color = Color(0.99607843, 0, 0, 1)
+debug_shape_thickness = 5
+script = ExtResource("6_eow3j")
+
+[connection signal="pressed" from="CanvasLayer/CameraToggle" to="Player" method="_on_camera_toggle_pressed"]
