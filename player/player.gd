@@ -67,7 +67,7 @@ func _physics_process(_delta: float) -> void:
 
 	move_and_slide()
 
-func _switch_to_front_camera() -> void:	
+func _switch_to_back_camera() -> void:	
 	body.show()
 	camera_ring.visible = false
 	camera_ring.progress = 0
@@ -77,7 +77,7 @@ func _switch_to_front_camera() -> void:
 	animation_tree.set("parameters/conditions/is_camera_close", true)
 	camera_shot_button.visible = false
 
-func _switch_to_back_camera() -> void:	
+func _switch_to_front_camera() -> void:	
 	camera_toggle.visible = false
 	animation_tree.set("parameters/conditions/is_camera_close", false)
 	animation_tree.set("parameters/conditions/is_camera_open", true)
@@ -93,8 +93,8 @@ func take_damage(damage: int) -> void:
 	print("taking :", damage)
 
 func _on_camera_toggle_pressed() -> void:
-	var is_camera_open: Variant = animation_tree.get("parameters/conditions/is_camera_open")
-	if is_camera_open:
+	var is_camera_open: Variant = animation_tree.get("parameters/conditions/is_camera_open")	
+	if !is_camera_open:
 		_switch_to_front_camera()
 	else:
 		_switch_to_back_camera()
