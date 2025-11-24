@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="fatal-shot"
+run/main_scene="uid://cph1n44kxx8gh"
 config/features=PackedStringArray("4.5", "Mobile")
 config/icon="res://icon.svg"
 
@@ -27,6 +28,11 @@ enabled=PackedStringArray("res://addons/radial_progress/plugin.cfg", "res://addo
 
 pointing/emulate_touch_from_mouse=true
 pointing/emulate_mouse_from_touch=false
+
+[layer_names]
+
+3d_render/layer_3="enemies"
+3d_physics/layer_3="enemies"
 
 [rendering]
 

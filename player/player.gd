@@ -1,16 +1,19 @@
 extends CharacterBody3D
 
-@onready var head = $Cameras
 @onready var body = $body
 @onready var animation_tree = $AnimationTree
 @onready var animation = $AnimationPlayer
-@onready var player_camera = $"Cameras/3d/PlayerCamera"
+
+# Cameras
+@onready var head = $Cameras
+@onready var back_camera = $"Cameras/3d/BackCamera"
 @onready var frontal_camera = $Cameras/FrontalCamera
 @onready var camera_toggle = %CameraToggle
-@onready var camera_raycast = $Cameras/FrontalCamera/Raycast
 @onready var camera_ring = %CameraFocus
+@onready var camera_shot_button = %CameraShot
 
 @export var joystick: VirtualJoystick
+@export var enable_keyboard_movement: bool = true 
 
 const SENSITIBITY: float = 0.5
 const SPEED: float = 5.0
@@ -29,7 +32,26 @@ func _unhandled_input(event: InputEvent) -> void:
 			head.rotation.x = clamp(head.rotation.x, deg_to_rad(-70), deg_to_rad(85))
 
 func _physics_process(_delta: float) -> void:
-	var input_dir = -joystick.get_value()
+	var input_dir_joystick = -joystick.get_value()
+	
+	# Obtener input de teclado (WASD)
+	var input_dir_keyboard = Vector2.ZERO
+	if Input.is_action_pressed("ui_up"):     # W
+		input_dir_keyboard.y = 1
+	if Input.is_action_pressed("ui_down"):   # S
+		input_dir_keyboard.y -= 1
+	if Input.is_action_pressed("ui_left"):   # A
+		input_dir_keyboard.x = 1
+	if Input.is_action_pressed("ui_right"):  # D
+		input_dir_keyboard.x -= 1
+
+	# Normalizar el input combinado si es necesario
+	var input_dir = input_dir_joystick
+	if enable_keyboard_movement:
+		input_dir += input_dir_keyboard
+	if input_dir.length() > 1:
+		input_dir = input_dir.normalized()
+		
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
 	animation_tree.set("parameters/conditions/idle", !direction)
@@ -47,40 +69,41 @@ func _physics_process(_delta: float) -> void:
 
 func _switch_to_front_camera() -> void:	
 	body.show()
-	camera_raycast.enabled = false
 	camera_ring.visible = false
 	camera_ring.progress = 0
 	animation_tree.set("parameters/conditions/is_camera_open", false)
-	player_camera.current = true
+	back_camera.current = true
 	frontal_camera.current = false
 	animation_tree.set("parameters/conditions/is_camera_close", true)
+	camera_shot_button.visible = false
 
-func _switch_to_player_camera() -> void:	
+func _switch_to_back_camera() -> void:	
 	camera_toggle.visible = false
 	animation_tree.set("parameters/conditions/is_camera_close", false)
 	animation_tree.set("parameters/conditions/is_camera_open", true)
 	await get_tree().create_timer(0.5).timeout
 	body.hide()
-	player_camera.current = false
+	back_camera.current = false
 	frontal_camera.current = true
 	camera_toggle.visible = true
 	camera_ring.visible = true
-	camera_raycast.enabled = true
+	camera_shot_button.visible = true
 
-func _on_raycast_is_focusing_enemy(isFocusing: bool) -> void:	
-	if isFocusing:
-		energy_bar += charging_speed
-	else:
-		energy_bar -= charging_speed
-	energy_bar = clamp(energy_bar, 0, 100)
-	camera_ring.progress = energy_bar
-	print(energy_bar)
-	
-
+func take_damage(damage: int) -> void:
+	print("taking :", damage)
 
 func _on_camera_toggle_pressed() -> void:
 	var is_camera_open: Variant = animation_tree.get("parameters/conditions/is_camera_open")
 	if is_camera_open:
 		_switch_to_front_camera()
 	else:
-		_switch_to_player_camera()
+		_switch_to_back_camera()
+
+
+func _on_frontal_camera_is_focusing_enemy(isFocusing: bool) -> void:
+	if isFocusing:
+		energy_bar += charging_speed
+	else:
+		energy_bar -= charging_speed
+	energy_bar = clamp(energy_bar, 0, 100)
+	camera_ring.progress = energy_bar
