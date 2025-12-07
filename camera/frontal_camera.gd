@@ -1,28 +1,35 @@
 extends Camera3D
 
 @onready var camera_shot_button = %CameraShot as TouchScreenButton
+@onready var camera_ring = %CameraFocus
 
 @export var ray_length: float = 30.0
 @export_range(0.01, 1.0, 0.01) var focus_angle_multiplier: float = 0.55
 @export var shot_delay: float = 1.0 
 
+
 const ENEMY_COLLISION_LAYER: int = 4
 
-signal is_focusing_enemy
-
+# State
 var is_shot_delayed = false
 var normal_color: Color = Color.WHITE
 var disabled_color: Color = Color(1, 1, 1, 0.5)
+var energy_bar = 0
+var charging_speed = 0.2
 
 func _ready() -> void:
 	normal_color = camera_shot_button.modulate
 
-func _process(delta: float) -> void:	
+func _process(delta: float) -> void:
 	if current:
-		var focused_enemy = check_cone_of_vision()
-		is_focusing_enemy.emit(focused_enemy != null)
+		if is_focusing_enemy():
+			energy_bar += charging_speed
+		else:
+			energy_bar -= charging_speed
+		energy_bar = clamp(energy_bar, 0, 100)
+		camera_ring.progress = energy_bar
 
-func check_cone_of_vision() -> CharacterBody3D:
+func is_focusing_enemy() -> bool:
 	var space_state = get_world_3d().direct_space_state
 	
 	var query = PhysicsShapeQueryParameters3D.new()
@@ -40,9 +47,7 @@ func check_cone_of_vision() -> CharacterBody3D:
 
 	for result in results:
 		var body = result.collider
-		
 		if body is CharacterBody3D and body.collision_layer == ENEMY_COLLISION_LAYER and not body.is_dead():
-			
 			var direction_to_enemy = (body.global_position - global_position).normalized()
 			var dot_product = camera_forward.dot(direction_to_enemy)
 			
@@ -53,13 +58,13 @@ func check_cone_of_vision() -> CharacterBody3D:
 			
 			if distance < 4.5:
 				if is_clear_sight(global_position, body.global_position):
-					return body
+					return true
 
 			elif dot_product > strict_threshold:
 				if is_clear_sight(global_position, body.global_position):
-					return body
+					return true
 
-	return null
+	return false
 
 func is_clear_sight(from: Vector3, to: Vector3) -> bool:
 	var space_state = get_world_3d().direct_space_state
@@ -71,7 +76,7 @@ func is_clear_sight(from: Vector3, to: Vector3) -> bool:
 
 func _on_camera_shot_pressed() -> void:
 	if current and not is_shot_delayed:
-		var enemy_to_damage = check_cone_of_vision()
+		var enemy_to_damage = is_focusing_enemy()
 		
 		if enemy_to_damage != null:
 			if enemy_to_damage.has_method("take_damage"):
@@ -88,3 +93,6 @@ func start_shot_delay():
 	camera_shot_button.set_process_input(true)
 	camera_shot_button.modulate = normal_color
 	is_shot_delayed = false
+
+func reset_energy():
+	energy_bar = 0
