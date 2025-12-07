@@ -20,16 +20,16 @@ var charging_speed = 0.2
 func _ready() -> void:
 	normal_color = camera_shot_button.modulate
 
-func _process(delta: float) -> void:
+func _process(delta: float):
 	if current:
-		if is_focusing_enemy():
+		if get_focused_enemy() != null:
 			energy_bar += charging_speed
 		else:
 			energy_bar -= charging_speed
 		energy_bar = clamp(energy_bar, 0, 100)
 		camera_ring.progress = energy_bar
 
-func is_focusing_enemy() -> bool:
+func get_focused_enemy() -> CharacterBody3D:
 	var space_state = get_world_3d().direct_space_state
 	
 	var query = PhysicsShapeQueryParameters3D.new()
@@ -58,13 +58,13 @@ func is_focusing_enemy() -> bool:
 			
 			if distance < 4.5:
 				if is_clear_sight(global_position, body.global_position):
-					return true
+					return body
 
 			elif dot_product > strict_threshold:
 				if is_clear_sight(global_position, body.global_position):
-					return true
+					return body
 
-	return false
+	return null
 
 func is_clear_sight(from: Vector3, to: Vector3) -> bool:
 	var space_state = get_world_3d().direct_space_state
@@ -76,8 +76,7 @@ func is_clear_sight(from: Vector3, to: Vector3) -> bool:
 
 func _on_camera_shot_pressed() -> void:
 	if current and not is_shot_delayed:
-		var enemy_to_damage = is_focusing_enemy()
-		
+		var enemy_to_damage = get_focused_enemy()
 		if enemy_to_damage != null:
 			if enemy_to_damage.has_method("take_damage"):
 				enemy_to_damage.take_damage(90)

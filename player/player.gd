@@ -3,7 +3,7 @@ extends CharacterBody3D
 @onready var body = $body
 @onready var animation_tree = $AnimationTree
 @onready var animation = $AnimationPlayer
-@onready var cameras = $Cameras
+@onready var cameras: Node3D = $Cameras
 @export var joystick: VirtualJoystick
 @export var enable_keyboard_movement: bool = true 
 @export var hurt_duration: float = 1
@@ -22,14 +22,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.position.x > (viewport_width / 2):
 			rotate_y(deg_to_rad(-event.relative.x * SENSITIBITY))
 			cameras.rotate_x(deg_to_rad(event.relative.y * SENSITIBITY))
-			body.rotate_y(deg_to_rad(event.relative.x * SENSITIBITY))
-			cameras.rotation.x = clamp(cameras.rotation.x, deg_to_rad(-70), deg_to_rad(85))
+			if cameras.is_frontal_camera_open():
+				cameras.rotation.x = clamp(cameras.rotation.x, deg_to_rad(-45), deg_to_rad(45))
+			else:
+				cameras.rotation.x = clamp(cameras.rotation.x, deg_to_rad(-70), deg_to_rad(85))
 
 func _physics_process(_delta: float) -> void:
 	if not can_act:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
 		velocity.z = move_toward(velocity.z, 0, SPEED)
-		velocity.y -= gravity * _delta
 		move_and_slide()
 		return
 	
@@ -92,7 +93,10 @@ func _on_camera_toggle_pressed() -> void:
 		animation_tree.set("parameters/conditions/is_camera_open", true)
 		await get_tree().create_timer(0.5).timeout
 		body.hide()
-		cameras.switch_to_frontal_camera(body.rotation)
+		var new_rotation_y = body.rotation.y
+		rotate_y(new_rotation_y)
+		body.rotate_y(-new_rotation_y)
+		cameras.switch_to_frontal_camera()
 
 func _change_to_camera_close_state():
 	body.show()
