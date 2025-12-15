@@ -4,15 +4,19 @@ extends Node3D
 @onready var back_camera = $"3d/BackCamera"
 @onready var frontal_camera = $FrontalCamera
 
-# UI
-@onready var camera_toggle = %CameraToggle
-@onready var camera_shot_button = %CameraShot
-@onready var camera_ring = %CameraFocus
+# HUD
+@export var HUD: CanvasLayer
 
 # State
 var is_frontal_active: bool = false
+var camera_toggle: TouchScreenButton
+var camera_shot: TouchScreenButton
+var camera_ring_focus: RadialProgress
 
 func _ready() -> void:
+	camera_toggle = HUD.get_node("CameraToggle")
+	camera_shot = HUD.get_node("CameraShot")
+	camera_ring_focus = HUD.get_node("CameraRingFocus")
 	back_camera.current = true
 	frontal_camera.current = false
 	is_frontal_active = false
@@ -26,16 +30,16 @@ func switch_to_frontal_camera():
 	reset_camera_x()
 	frontal_camera.current = true
 	camera_toggle.visible = true
-	camera_ring.visible = true
-	camera_shot_button.visible = true
+	camera_ring_focus.visible = true
+	camera_shot.visible = true
 	
 func switch_to_back_camera():
 	reset_camera_x()
 	back_camera.current = true
 	frontal_camera.current = false
-	camera_ring.visible = false
+	camera_ring_focus.visible = false
 	frontal_camera.reset_energy()
-	camera_shot_button.visible = false
+	camera_shot.visible = false
 
 func reset_camera_x():
 	rotation.x = 0

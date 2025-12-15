@@ -3,8 +3,9 @@ extends CharacterBody3D
 @onready var body = $body
 @onready var animation_tree = $AnimationTree
 @onready var animation = $AnimationPlayer
-@onready var cameras: Node3D = $Cameras
-@export var joystick: VirtualJoystick
+
+@export var cameras: Node3D 
+@export var HUD: CanvasLayer
 @export var enable_keyboard_movement: bool = true 
 @export var hurt_duration: float = 1
 
@@ -12,6 +13,16 @@ const SENSITIBITY: float = 0.5
 const SPEED: float = 5.0
 var can_act: bool = true
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
+var joystick: VirtualJoystick
+
+#signal camera_toggle_pressed()
+#
+#func _on_camera_toggle_pressed_action():
+	#emit_signal("camera_toggle_pressed")
+
+func _ready():
+	joystick = HUD.get_node("VirtualJoystick")
+	HUD.get_node("CameraToggle").connect("pressed", _on_camera_toggle_pressed)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not can_act:

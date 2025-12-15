@@ -1,0 +1,63 @@
+[gd_scene load_steps=7 format=3 uid="uid://b7baa23ofemuy"]
+
+[ext_resource type="Script" uid="uid://d1nq7ivmmjndb" path="res://addons/virtual_joystick/virtual_joystick.gd" id="1_546lt"]
+[ext_resource type="Texture2D" uid="uid://be1dk83uml5iw" path="res://assets/hud/camera_toggle.png" id="2_en2x2"]
+[ext_resource type="Texture2D" uid="uid://bril1jb3le823" path="res://assets/hud/camera_shot.png" id="3_7ihmi"]
+[ext_resource type="Script" uid="uid://cbc6r3x84ejtj" path="res://addons/radial_progress/RadialProgress.gd" id="3_en2x2"]
+
+[sub_resource type="Gradient" id="Gradient_en2x2"]
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_1v5rv"]
+gradient = SubResource("Gradient_en2x2")
+
+[node name="HUD" type="CanvasLayer"]
+
+[node name="VirtualJoystick" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 41.0
+offset_top = 377.0
+offset_right = 250.0
+offset_bottom = 586.0
+scale = Vector2(1.087, 1.087)
+script = ExtResource("1_546lt")
+joystick_opacity = 0.445
+joystick_border = 4.5
+scale_factor = 1.087
+stick_opacity = 0.405
+metadata/_custom_type_script = "uid://d1nq7ivmmjndb"
+
+[node name="CameraToggle" type="TouchScreenButton" parent="."]
+modulate = Color(1, 1, 1, 0.69411767)
+position = Vector2(964, 299)
+scale = Vector2(0.45, 0.441)
+texture_normal = ExtResource("2_en2x2")
+texture_pressed = SubResource("GradientTexture2D_1v5rv")
+visibility_mode = 1
+
+[node name="CameraShot" type="TouchScreenButton" parent="."]
+visible = false
+modulate = Color(1, 1, 1, 0.69411767)
+position = Vector2(816, 444)
+scale = Vector2(0.5, 0.49)
+texture_normal = ExtResource("3_7ihmi")
+visibility_mode = 1
+
+[node name="CameraRingFocus" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 4
+script = ExtResource("3_en2x2")
+radius = 200.0
+thickness = 10.0
+bar_color = Color(0.82060444, 0.118108906, 0.26609978, 1)
+ring = true
+nb_points = 31
+metadata/_custom_type_script = "uid://cbc6r3x84ejtj"

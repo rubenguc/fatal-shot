@@ -1,12 +1,8 @@
 extends Camera3D
 
-@onready var camera_shot_button = %CameraShot as TouchScreenButton
-@onready var camera_ring = %CameraFocus
-
 @export var ray_length: float = 30.0
 @export_range(0.01, 1.0, 0.01) var focus_angle_multiplier: float = 0.55
 @export var shot_delay: float = 1.0 
-
 
 const ENEMY_COLLISION_LAYER: int = 4
 
@@ -17,8 +13,14 @@ var disabled_color: Color = Color(1, 1, 1, 0.5)
 var energy_bar = 0
 var charging_speed = 0.2
 
+var camera_shot: TouchScreenButton
+var camera_ring_focus: RadialProgress
+
 func _ready() -> void:
-	normal_color = camera_shot_button.modulate
+	var HUD = get_parent().HUD as CanvasLayer
+	camera_ring_focus = HUD.get_node("CameraRingFocus")
+	camera_shot = HUD.get_node("CameraShot")
+
 
 func _process(delta: float):
 	if current:
@@ -27,7 +29,7 @@ func _process(delta: float):
 		else:
 			energy_bar -= charging_speed
 		energy_bar = clamp(energy_bar, 0, 100)
-		camera_ring.progress = energy_bar
+		camera_ring_focus.progress = energy_bar
 
 func get_focused_enemy() -> CharacterBody3D:
 	var space_state = get_world_3d().direct_space_state
@@ -83,14 +85,14 @@ func _on_camera_shot_pressed() -> void:
 				start_shot_delay()
 
 func start_shot_delay():
-	camera_shot_button.set_process_input(false)
-	camera_shot_button.modulate = disabled_color
+	camera_shot.set_process_input(false)
+	camera_shot.modulate = disabled_color
 	is_shot_delayed = true
 
 	await get_tree().create_timer(shot_delay).timeout
 
-	camera_shot_button.set_process_input(true)
-	camera_shot_button.modulate = normal_color
+	camera_shot.set_process_input(true)
+	camera_shot.modulate = normal_color
 	is_shot_delayed = false
 
 func reset_energy():
