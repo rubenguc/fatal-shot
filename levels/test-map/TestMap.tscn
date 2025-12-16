@@ -1,7 +1,7 @@
 [gd_scene load_steps=14 format=3 uid="uid://bdk2oxmkmet0k"]
 
 [ext_resource type="Texture2D" uid="uid://cwxh2mln35jko" path="res://levels/map_Tiles.png" id="1_ek4es"]
-[ext_resource type="Texture2D" uid="uid://d0vur50fx3ib" path="res://levels/map_ConcreteBare.png" id="2_608yx"]
+[ext_resource type="Texture2D" path="res://levels/map_ConcreteBare.png" id="2_608yx"]
 [ext_resource type="Texture2D" uid="uid://dqut12l8w8tun" path="res://levels/map_tile_tile.jpg" id="3_608yx"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pwwy3"]
